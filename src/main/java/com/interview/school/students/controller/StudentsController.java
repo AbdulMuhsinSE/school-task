@@ -1,10 +1,11 @@
-package com.interview.school.courses.controller;
+package com.interview.school.students.controller;
 
 import com.interview.school.common.response.ApiResponse;
 import com.interview.school.common.response.ApiResponseBuilder;
-import com.interview.school.courses.payload.CourseDto;
-import com.interview.school.courses.payload.UpdateCourseDto;
-import com.interview.school.courses.service.CoursesService;
+import com.interview.school.students.payload.StudentDto;
+import com.interview.school.students.payload.UpdateStudentDto;
+import com.interview.school.students.service.StudentsService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,9 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,20 +30,27 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * CoursesController.
+ * StudentsController.
  *
  * @author AbdulMuhsin J. Al-Kandari
  */
 @RestController
-@Tag(name = "Courses")
-@RequestMapping("/courses")
+@Tag(name = "Students")
+@RequestMapping("/students")
 @AllArgsConstructor
 @Validated
-public class CoursesController {
-    private final CoursesService srv;
+public class StudentsController {
+    private StudentsService srv;
 
-    @Operation(summary = "Create A New Course",
-            description = "Endpoint that allows for the creation of a new course"
+    @Hidden
+    @GetMapping("/error")
+    public ResponseEntity<ApiResponse<Void>> demonstrateProfilesThroughError() {
+        throw new RuntimeException("This is a run time exception. If profile is set to prod " +
+                "it will not show");
+    }
+
+    @Operation(summary = "Create A New Student",
+            description = "Endpoint that allows for the creation of a new student"
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -54,49 +62,49 @@ public class CoursesController {
                     responseCode = "400", description = "Failed to save to DB", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> createCourse(@RequestBody @Valid final CourseDto course) throws URISyntaxException {
-        return ApiResponseBuilder.created(srv.createCourse(course));
+    public ResponseEntity<ApiResponse<String>> createStudent(@RequestBody @Valid final StudentDto student) throws URISyntaxException {
+        return ApiResponseBuilder.created(srv.createStudent(student));
     }
 
-    @Operation(summary = "Get Course(s)",
-            description = "Endpoint that allows for the retrieval of all courses, or a specific course using it's id"
+    @Operation(summary = "Get Student(s)",
+            description = "Endpoint that allows for the retrieval of all students, or a specific student using their id"
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "successful retrieval creation",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CourseDto.class))
+                            array = @ArraySchema(schema = @Schema(implementation = StudentDto.class))
                     )),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404", description = "Course not found", content = @Content)
+                    responseCode = "404", description = "Student not found", content = @Content)
     })
-    @GetMapping(value={"","/{courseId}"})
-    public ResponseEntity<ApiResponse<List<CourseDto>>> getCourses(@PathVariable(required = false) String courseId) {
-        return ApiResponseBuilder.ok(srv.getCourses(courseId));
+    @GetMapping(value={"","/{studentId}"})
+    public ResponseEntity<ApiResponse<List<StudentDto>>> getStudents(@PathVariable(required = false) String studentId) {
+        return ApiResponseBuilder.ok(srv.getStudents(studentId));
     }
 
-    @Operation(summary = "Update Course Info",
-            description = "Endpoint that allows for the updating of a course name, and size."
+    @Operation(summary = "Update Student Info",
+            description = "Endpoint that allows for the updating of a student name, and size."
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "successful update",
-                    content = @Content(schema = @Schema(implementation = CourseDto.class))),
+                    content = @Content(schema = @Schema(implementation = StudentDto.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400", description = "Validation Error", content = @Content),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400", description = "Update failed due to non-existence of course", content = @Content)
+                    responseCode = "400", description = "Update failed due to non-existence of student", content = @Content)
     })
-    @PutMapping("/{courseId}")
-    public ResponseEntity<ApiResponse<CourseDto>> updateCourse(
-            @PathVariable String courseId,
-            @RequestBody UpdateCourseDto courseUpdateDto
+    @PatchMapping("/{studentId}")
+    public ResponseEntity<ApiResponse<StudentDto>> updateStudent(
+            @PathVariable String studentId,
+            @RequestBody UpdateStudentDto studentUpdateDto
     ) {
-        return ApiResponseBuilder.ok(srv.updateCourses(courseId, courseUpdateDto));
+        return ApiResponseBuilder.ok(srv.updateStudents(studentId, studentUpdateDto));
     }
 
-    @Operation(summary = "Delete Course",
-            description = "Endpoint that allows for the deletion of a course by its ID"
+    @Operation(summary = "Delete Student",
+            description = "Endpoint that allows for the deletion of a student by its ID"
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -105,11 +113,11 @@ public class CoursesController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400", description = "Validation Error", content = @Content),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400", description = "Delete failed due to non-existence of course", content = @Content)
+                    responseCode = "400", description = "Delete failed due to non-existence of student", content = @Content)
     })
-    @DeleteMapping("/{courseId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCourse(@PathVariable @NotBlank String courseId) {
-        srv.deleteCourse(courseId);
+    @DeleteMapping("/{studentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteStudent(@PathVariable @NotBlank String studentId) {
+        srv.deleteStudent(studentId);
         return ApiResponseBuilder.ok();
     }
 }
