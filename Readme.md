@@ -3,6 +3,9 @@ Built on the principle of a modular monolith, as building microservices would ta
 There is more that could be done architecturally, further division of the dtos, models, and entities 
 such that there is less coupling between the modules would be better.
 
+# Consideration
+
+Be sure to set the spring profile, supported profiles are dev and prod.
 
 # Relevant URIs
 
